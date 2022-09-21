@@ -6,16 +6,11 @@ import 'react-toastify/dist/ReactToastify.css'
 import axios from "axios";
 
 import Logo from '../assets/logo.svg'
-import {registerRoute} from "../utils/APIRoutes";
+import {loginRoute} from "../utils/APIRoutes";
 
 const Login = (props) => {
     const navigate = useNavigate()
-    const [values, setValues] = useState({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    })
+    const [values, setValues] = useState({ username: '', password: '' })
 
     const toastOptions = {
         position: "bottom-right",
@@ -25,36 +20,32 @@ const Login = (props) => {
         theme: "dark"
     }
 
+    useEffect(() => {
+        if (localStorage.getItem('chat-app-user')) {
+            navigate('/')
+        }
+    }, [])
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (handleValidation()) {
-            const {password, username, email} = values
-            const {data} = await axios.post(registerRoute, {
-                username, email, password
-            })
+            const {password, username} = values
+            const {data} = await axios.post(loginRoute, { username, password })
             if (data.status === false) {
                 toast.error(data.msg, toastOptions)
             }
             if (data.status === true) {
                 localStorage.setItem('chat-app-user', JSON.stringify(data.user))
+                navigate('/')
             }
-            navigate('/')
+
         }
     }
 
     const handleValidation = () => {
-        const {password, confirmPassword, username, email} = values //values do useState()
-        if (password !== confirmPassword) {
-            toast.error('Password and Confirm Password have to been the same!', toastOptions)
-            return false
-        } else if (username.length < 3) {
-            toast.error('Username should be greater than 3 characters', toastOptions)
-            return false
-        } else if (password.length < 3) {
-            toast.error('Password should be equal or greater than 8 characters', toastOptions)
-            return false
-        } else if (email === '') {
-            toast.error('Email is required!', toastOptions)
+        const {password, username} = values //values do useState()
+        if (username.length == 0 || password.length == 0) {
+            toast.error('Username and Password are required!', toastOptions)
             return false
         }
 
@@ -81,12 +72,11 @@ const Login = (props) => {
                         <img src={Logo} alt="Logo" className={'logo-form'}/>
                         <h1>Chatty</h1>
                     </div>
-                    <input type="text" name="username" id="username" placeholder={'Enter a username'} onChange={e => handleChange(e)}/>
-                    <input type="email" name="email" id="email" placeholder={'Enter a email'} onChange={e => handleChange(e)}/>
+                    <input type="text" name="username" id="username" placeholder={'Enter a username'}
+                           onChange={e => handleChange(e)} min={3}/>
                     <input type="password" name="password" id="password" placeholder={'Enter a password'} onChange={e => handleChange(e)}/>
-                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder={'Confirm a password'} onChange={e => handleChange(e)}/>
-                    <input type="submit" value="Submit"/>
-                    <span>Already have a account? <Link to={'/login'}>Login</Link> </span>
+                    <input type="submit" value="Login"/>
+                    <span>don't have a account? <Link to={'/register'}>Register</Link> </span>
                 </form>
                 <ToastContainer />
             </FormContainer>

@@ -27,7 +27,7 @@ const User = sequelize.define('user', {
         default: false
     },
     avatarImage: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         default: ""
     }
 })
